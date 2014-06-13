@@ -75,4 +75,4 @@ class AboutModules(Koan):
         try:
             duck = SecretDuck()
         except NameError as ex:
-            self.assertMatch("global name 'SecretDuck' is not defined", ex[0])
+            self.assertMatch(__, ex[0])
