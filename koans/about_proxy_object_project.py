@@ -21,13 +21,40 @@ from runner.koan import *
 
 class Proxy(object):
     def __init__(self, target_object):
-        # WRITE CODE HERE
-
+        object.__setattr__(self, '_messages', [])
+        object.__setattr__(self, '_was_called', {})
         #initialize '_obj' attribute last. Trust me on this!
-        self._obj = target_object
+        object.__setattr__(self, '_obj', target_object)
 
-    # WRITE CODE HERE
+    def messages(self):
+        return self._messages
 
+    def was_called(self, attribute):
+        return attribute in self._was_called
+
+    def number_of_times_called(self, attribute):
+        if attribute in self._was_called:
+            return self._was_called[attribute]
+        else:
+            return 0
+    def __setattr__(self, attr_name, value):
+        self._messages.append(attr_name)
+        if attr_name in self._was_called:
+            self._was_called[attr_name] += 1
+        else:
+            self._was_called[attr_name] = 1
+        setattr(object.__getattribute__(self, "_obj"), attr_name, value)
+
+    def __getattr__(self, attr_name):
+        if attr_name == 'messages':
+            return self.messages()
+        else:
+            self._messages.append(attr_name)
+            if attr_name in self._was_called:
+                self._was_called[attr_name] += 1
+            else:
+                self._was_called[attr_name] = 1
+            return getattr(object.__getattribute__(self, "_obj"), attr_name)
 
 # The proxy object should pass the following Koan:
 #
@@ -112,11 +139,11 @@ class Television(object):
     @property
     def channel(self):
         return self._channel
-
+    
     @channel.setter
     def channel(self, value):
         self._channel = value
-
+ 
     def power(self):
         if self._power == 'on':
             self._power = 'off'
